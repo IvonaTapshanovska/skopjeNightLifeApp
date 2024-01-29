@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:skopjeapp/firebase_options.dart';
 import 'models/event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/event_widget.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,20 +44,21 @@ class MainListScreenState extends State<MainListScreen> {
   final List<EventInfo> events = [
     EventInfo(clubName: "Happy caffe", eventName: "DJ dj", location: "Aerodrom,Skopje",
     dateTime: DateTime.now(), minAge: 18, pictureUrl: "photos/party.jpg"),
-    
+
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
  appBar: AppBar(
-    title: const Text('Events in Skopje'),
+    title: const Text('Events in Skopje',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w900),),
+     backgroundColor: Colors.indigo,
     actions: [
       Row(
         children: [
           //const Text('Add a new course:'),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add,color: Colors.white70,),
             onPressed: () => FirebaseAuth.instance.currentUser != null
                 ? _addEventFunction(context)
                 : _navigateToSignInPage(context),
@@ -67,7 +70,7 @@ class MainListScreenState extends State<MainListScreen> {
         children: [
           //const Text("Log out:"),
       IconButton(
-        icon: const Icon(Icons.login),
+        icon: const Icon(Icons.login,color: Colors.white70,),
         onPressed: _signOut,
       ),    
     ],
@@ -75,6 +78,7 @@ class MainListScreenState extends State<MainListScreen> {
     ]
   ),
      body: Container(
+       color: Colors.grey[400],
       height: MediaQuery.of(context).size.height * 1.0, // Adjust the value as needed
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -93,47 +97,78 @@ class MainListScreenState extends State<MainListScreen> {
 
           return Container(
             width: MediaQuery.of(context).size.width * 0.5, // Adjust the value as needed
-            height: 50, // Set a fixed height for each card
+            height: 200, // Set a fixed height for each card
+            margin: const EdgeInsets.all(8.0),
             child: Card(
-              color: Colors.lightBlue,
+              elevation: 5,
+              color: Colors.indigo,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0), // Add rounded corners
+              ),
+              child:Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Text('Club Name: $clubName'),
+                      Text('Club Name: $clubName',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                      ),
+
                     ],
                   ),
                   Row(
                     children: [
-                      Text('Event Name: $eventName'),
+                      Text(
+                        'Event Name: $eventName',
+                        style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),),
                     ],
                   ),
                   Row(
                     children: [
-                      Text('Location: $location'),
+                      Text('Location: $location',
+                        style: const TextStyle(
+                      fontSize: 14,
+                            color: Colors.white70,
+                  ),),
                     ],
                   ),
                   Row(
                     children: [
-                      Text(dateTime.toString()),
+                      Text(dateTime.toString(),
+                        style: const TextStyle(
+                        fontSize:14,
+                          color: Colors.white70,
+          ),),
                     ],
                   ),
                   Row(
                     children: [
-                      Text('Minimum Age: $minAge'),
+                      Text('Minimum Age: $minAge',
+                        style: const TextStyle(fontSize: 14,color: Colors.white70,),),
                     ],
                   ),
-                  Row(
-              children: [
-              Image.asset(
-                  pictureUrl,
-                  width: 100, // Adjust the width as needed
-                  height: 100, // Adjust the height as needed
-                ),
-              ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: Image.asset(
+                      pictureUrl,
+                      fit: BoxFit.cover, // Ensure the image covers the entire space
+                    ),
+
             ),
                 ],
               ),
+            ),
             ),
           );
         },
@@ -153,6 +188,7 @@ class MainListScreenState extends State<MainListScreen> {
   }
 
   Future<void> _addEventFunction(BuildContext context) async {
+
     return showModalBottomSheet(
         context: context,
         builder: (_) {
@@ -215,6 +251,7 @@ class AuthScreenState extends State<AuthScreen> {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 2),
+      backgroundColor: Colors.indigo,
     ));
   }
 
@@ -264,14 +301,14 @@ class AuthScreenState extends State<AuthScreen> {
       ),
       body: Container(
         // Set the background color for the login page
-        color: Color.fromARGB(255, 220, 220, 220), // You can choose any color you prefer
+        color: const Color.fromARGB(255, 220, 220, 220), // You can choose any color you prefer
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Make the email text bold
-              Text(
+              const Text(
                 "Email",
                 style: TextStyle(
                   color: Colors.black, // Text color
@@ -285,7 +322,7 @@ class AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 20),
               // Make the password text bold
-              Text(
+              const Text(
                 "Password",
                 style: TextStyle(
                   color: Colors.black, // Text color
@@ -300,6 +337,10 @@ class AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.indigo,  // Button text color
+                ),
                 onPressed: _authAction,
                 child: Text(widget.isLogin ? "Sign In" : "Register"),
               ),
