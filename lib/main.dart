@@ -7,11 +7,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/event_widget.dart';
 import 'package:image_picker/image_picker.dart';
 
+
+import 'dart:io';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-);
+  );
   runApp(const MyApp());
 }
 
@@ -41,141 +43,150 @@ class MainListScreen extends StatefulWidget {
 }
 
 class MainListScreenState extends State<MainListScreen> {
-  final List<EventInfo> events = [
-    EventInfo(clubName: "Happy caffe", eventName: "DJ dj", location: "Aerodrom,Skopje",
-    dateTime: DateTime.now(), minAge: 18, pictureUrl: "photos/party.jpg"),
-
-  ];
+  final List<EventInfo> events = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
- appBar: AppBar(
-    title: const Text('Events in Skopje',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w900),),
-     backgroundColor: Colors.indigo,
-    actions: [
-      Row(
-        children: [
-          //const Text('Add a new course:'),
-          IconButton(
-            icon: const Icon(Icons.add,color: Colors.white70,),
-            onPressed: () => FirebaseAuth.instance.currentUser != null
-                ? _addEventFunction(context)
-                : _navigateToSignInPage(context),
+      appBar: AppBar(
+          title: const Text('Events in Skopje',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w900),),
+          backgroundColor: Colors.indigo,
+          actions: [
+            Row(
+              children: [
+                //const Text('Add a new course:'),
+                IconButton(
+                  icon: const Icon(Icons.add,color: Colors.white70,),
+                  onPressed: () => FirebaseAuth.instance.currentUser != null
+                      ? _addEventFunction(context)
+                      : _navigateToSignInPage(context),
+                ),
+
+              ],
+            ),
+            Row(
+              children: [
+                //const Text("Log out:"),
+                IconButton(
+                  icon: const Icon(Icons.login,color: Colors.white70,),
+                  onPressed: _signOut,
+                ),
+              ],
+            )
+          ]
+      ),
+      body: Container(
+        color: Colors.grey[400],
+        height: MediaQuery.of(context).size.height * 1.0, // Adjust the value as needed
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 1,
+            crossAxisSpacing: 5.0,
+            mainAxisSpacing: 5.0,
           ),
-         
-        ],
-      ),
-      Row(
-        children: [
-          //const Text("Log out:"),
-      IconButton(
-        icon: const Icon(Icons.login,color: Colors.white70,),
-        onPressed: _signOut,
-      ),    
-    ],
-      )
-    ]
-  ),
-     body: Container(
-       color: Colors.grey[400],
-      height: MediaQuery.of(context).size.height * 1.0, // Adjust the value as needed
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          crossAxisSpacing: 5.0,
-          mainAxisSpacing: 5.0,
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            final clubName = events[index].clubName;
+            final eventName = events[index].eventName;
+            final location = events[index].location;
+            final dateTime = events[index].dateTime;
+            final minAge = events[index].minAge;
+            final pictureUrl = events[index].pictureUrl;
+
+            return Container(
+              width: MediaQuery.of(context).size.width * 0.5, // Adjust the value as needed
+              height: 200, // Set a fixed height for each card
+              margin: const EdgeInsets.all(8.0),
+              child: Card(
+                elevation: 5,
+                color: Colors.indigo,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0), // Add rounded corners
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Club Name: $clubName',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Event Name: $eventName',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Location: $location',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            dateTime.toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Minimum Age: $minAge',
+                            style: const TextStyle(fontSize: 14, color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          if (pictureUrl.isNotEmpty)
+                            Image.file(
+                              File(pictureUrl),
+                              width: 371,
+                              height: 262,
+                            )
+                          else
+                            Text('No Image Selected'),
+                          // Add other widgets if needed
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            );
+          },
         ),
-        itemCount: events.length,
-        itemBuilder: (context, index) {
-          final clubName = events[index].clubName;
-          final eventName = events[index].eventName;
-          final location = events[index].location;
-          final dateTime = events[index].dateTime;
-          final minAge = events[index].minAge;
-          final pictureUrl = events[index].pictureUrl;
-
-          return Container(
-            width: MediaQuery.of(context).size.width * 0.5, // Adjust the value as needed
-            height: 200, // Set a fixed height for each card
-            margin: const EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 5,
-              color: Colors.indigo,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0), // Add rounded corners
-              ),
-              child:Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text('Club Name: $clubName',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
-                      ),
-
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Event Name: $eventName',
-                        style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic,
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('Location: $location',
-                        style: const TextStyle(
-                      fontSize: 14,
-                            color: Colors.white70,
-                  ),),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(dateTime.toString(),
-                        style: const TextStyle(
-                        fontSize:14,
-                          color: Colors.white70,
-          ),),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('Minimum Age: $minAge',
-                        style: const TextStyle(fontSize: 14,color: Colors.white70,),),
-                    ],
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Image.asset(
-                      pictureUrl,
-                      fit: BoxFit.cover, // Ensure the image covers the entire space
-                    ),
-
-            ),
-                ],
-              ),
-            ),
-            ),
-          );
-        },
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
@@ -223,7 +234,7 @@ class AuthScreenState extends State<AuthScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
-      GlobalKey<ScaffoldMessengerState>();
+  GlobalKey<ScaffoldMessengerState>();
 
   Future<void> _authAction() async {
     try {
@@ -260,7 +271,7 @@ class AuthScreenState extends State<AuthScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-     
+
           content: Text(message),
           actions: [
             TextButton(
@@ -293,7 +304,7 @@ class AuthScreenState extends State<AuthScreen> {
     });
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

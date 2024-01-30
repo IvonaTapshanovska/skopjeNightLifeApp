@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:camera/camera.dart';
 
 class EventWidget extends StatefulWidget {
   final Function(EventInfo) addEvent;
@@ -38,15 +40,23 @@ class EventWidgetState extends State<EventWidget> {
     }
   }
   Future<void> _pickImage() async {
-  final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
 
-  if (pickedFile != null) {
-    setState(() {
-      pictureUrl = pickedFile.path;
-    });
+    if (pickedFile != null) {
+      setState(() {
+        pictureUrl = pickedFile.path;
+      });
+    }
   }
-}
+  Future<void> _takeImage() async {
+    final pickedFile = await ImagePicker().getImage(source: ImageSource.camera);
 
+    if (pickedFile != null) {
+      setState(() {
+        pictureUrl = pickedFile.path;
+      });
+    }
+  }
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? timePicked = await showTimePicker(
       context: context,
@@ -139,40 +149,55 @@ class EventWidgetState extends State<EventWidget> {
               ],
             ),
             const SizedBox(height: 16),
-          TextField(
-            controller: locationController, // Add a TextEditingController for location
-            decoration: InputDecoration(
-              labelText: 'Location',
-              labelStyle: TextStyle(color: Colors.black),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue, width: 2),
-              ),
-            ),
-          ),
-          TextField(
-            controller: minAgeController, // Add a TextEditingController for location
-            decoration: InputDecoration(
-              labelText: 'Minimum visitors age',
-              labelStyle: TextStyle(color: Colors.black),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+            TextField(
+              controller: locationController, // Add a TextEditingController for location
+              decoration: InputDecoration(
+                labelText: 'Location',
+                labelStyle: TextStyle(color: Colors.black),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                ),
               ),
             ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-            primary: Colors.blue, // Change button color
-          ),
-          onPressed: () => _pickImage(),
-          child: const Text('Pick Image'),
-        ),
-
+            TextField(
+              controller: minAgeController, // Add a TextEditingController for location
+              decoration: InputDecoration(
+                labelText: 'Minimum visitors age',
+                labelStyle: TextStyle(color: Colors.black),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue, // Change button color
+              ),
+              onPressed: () => _pickImage(),
+              child: const Text('Pick Image'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.redAccent, // Change button color
+              ),
+              onPressed: () => _takeImage(),
+              child: const Text('Take a Photo'),
+            ),
+              if (pictureUrl.isNotEmpty)
+                  Image.file(
+                File(pictureUrl),
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                )
+              else
+                Text('No Image Selected'),
             const SizedBox(height: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -192,7 +217,7 @@ class EventWidgetState extends State<EventWidget> {
                   location: locationController.text,
                   dateTime: selectedDateTime,
                   minAge: int.tryParse(minAgeController.text) ?? 0,
-                  pictureUrl: pictureUrlController.text,
+                  pictureUrl: pictureUrl,
                 );
                 widget.addEvent(event);
                 Navigator.pop(context);

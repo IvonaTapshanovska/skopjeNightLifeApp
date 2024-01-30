@@ -77,4 +77,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'skopjeapp-56f6c.appspot.com',
     iosBundleId: 'com.example.skopjeapp.RunnerTests',
   );
+
 }
+
