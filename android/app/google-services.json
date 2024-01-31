@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409147253126",
+    "project_id": "skopjeapp-56f6c",
+    "storage_bucket": "skopjeapp-56f6c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409147253126:android:3a9cc1744d8968bd3bcc07",
+        "android_client_info": {
+          "package_name": "com.example.skopjeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkJ-LAOoNCEN9zDeHm8S1OqF8n2SY3ZGw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
