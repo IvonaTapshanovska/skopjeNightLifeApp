@@ -329,16 +329,16 @@ class MainListScreenState extends State<MainListScreen> {
                 ],
               ),
               if (event.pictureUrl.isNotEmpty)
-               Expanded(
-              child:
+                Expanded(
+                    child:
 
-                Image.network(
-                  event.pictureUrl,
-                  width: 371,
-                  height: 250,
-                  fit: BoxFit.cover,
-                ) )
-                else
+                    Image.network(
+                      event.pictureUrl,
+                      width: 371,
+                      height: 250,
+                      fit: BoxFit.cover,
+                    ) )
+              else
                 Text('No Image Selected'),
               SizedBox(height: 10),
 
