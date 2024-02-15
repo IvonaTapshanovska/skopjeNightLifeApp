@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/intl.dart';
 import 'package:skopjeapp/firebase_options.dart';
+import 'package:skopjeapp/widgets/map_page.dart';
 import 'models/event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets/event_widget.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +19,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+   const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +37,32 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class EventDetailsScreen extends StatelessWidget {
   final EventInfo event;
 
-  const EventDetailsScreen({Key? key, required this.event}) : super(key: key);
+  EventDetailsScreen({Key? key, required this.event}) : super(key: key);
 
+  late GoogleMapController mapController;
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
 
       appBar: AppBar(
-        title: Text('Event Details'),
+        title:Text(
+
+          event.clubName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87
+          ),
+        ),
 
       ),
       backgroundColor: Colors.indigo,
@@ -53,11 +70,19 @@ class EventDetailsScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(
+              width: double.infinity,
+              child: event.pictureUrl.isNotEmpty
+                  ? Image.network(
+                File(event.pictureUrl).path,
+                fit: BoxFit.cover,
+              )
+                  : Text('No Image Available'),
+            ),
+            Divider(),
             Text(
-
               'Club Name:',
               style: TextStyle(
                 fontSize: 18,
@@ -73,7 +98,7 @@ class EventDetailsScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16),
+            Divider(),
             Text(
               'Event Name:',
               style: TextStyle(
@@ -90,7 +115,7 @@ class EventDetailsScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16),
+            Divider(),
             Text(
               'Location:',
               style: TextStyle(
@@ -106,7 +131,7 @@ class EventDetailsScreen extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16),
+            Divider(),
             Text(
               'Date:',
               style: TextStyle(
@@ -116,13 +141,14 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              event.dateTime.toString(),
+              DateFormat('yyyy-MM-dd   HH:mm').format(event.dateTime),
+              // Format the date and time using DateFormat
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16),
+            Divider(),
             Text(
               'Minimum Age:',
               style: TextStyle(
@@ -139,19 +165,21 @@ class EventDetailsScreen extends StatelessWidget {
                 fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 16),
-            if (event.pictureUrl.isNotEmpty)
-              Image.network(
-                File(event.pictureUrl).path,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-              )
-            else
-              Text('No Image Available'),
-          ],
+            Divider(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MapPage(event: event,),
+                  ),
+                );
+              },
+              child: Text('Map'),
+            ),
+            ],
         ),
-      ),
+    ),
     );
   }
 }
@@ -302,8 +330,9 @@ class MainListScreenState extends State<MainListScreen> {
                         ),
                       ),
                       Text(
-                        event.dateTime.toString(),
-                        style: const TextStyle(
+                        DateFormat('yyyy-MM-dd    HH:mm').format(event.dateTime),
+                        // Format the date and time using DateFormat
+                        style: TextStyle(
                           fontSize: 14,
                           color: Colors.white70,
                         ),

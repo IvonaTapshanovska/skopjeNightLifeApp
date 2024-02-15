@@ -8,7 +8,6 @@ import 'package:camera/camera.dart';
 
 class EventWidget extends StatefulWidget {
   final Function(EventInfo) addEvent;
-
   const EventWidget({required this.addEvent, super.key});
 
   @override
@@ -21,7 +20,8 @@ class EventWidgetState extends State<EventWidget> {
   final TextEditingController dateTimeController = TextEditingController();
   final TextEditingController minAgeController = TextEditingController();
   final TextEditingController clubController = TextEditingController();
-
+  final TextEditingController lonController = TextEditingController();
+  final TextEditingController latController = TextEditingController();
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
 
@@ -109,8 +109,10 @@ class EventWidgetState extends State<EventWidget> {
         )),
         minAge: int.tryParse(minAgeController.text) ?? 0,
         pictureUrl: imageUrl,
+        lon: double.tryParse(lonController.text) ?? 0.0,
+        lat: double.tryParse(latController.text) ?? 0.0,
       );
-
+      EventInfo getEventInfo() => event;
       // Call the addEvent callback to add the event to the parent widget
       widget.addEvent(event);
 
@@ -121,6 +123,8 @@ class EventWidgetState extends State<EventWidget> {
         locationController.clear();
         minAgeController.clear();
         pictureUrl = '';
+        lonController.clear();
+        latController.clear();
         // Reset other controllers or form state as needed
       });
     }
@@ -236,6 +240,35 @@ class EventWidgetState extends State<EventWidget> {
                 ),
               ),
             ),
+            Container(height: 10),
+            TextField(
+              controller: lonController,
+              decoration: InputDecoration(
+                labelText: 'Lon...',
+                labelStyle: TextStyle(color: Colors.black),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                ),
+              ),
+            ),
+            Container(height: 10),
+            TextField(
+              controller: latController,
+              decoration: InputDecoration(
+                labelText: 'Lat...',
+                labelStyle: TextStyle(color: Colors.black),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                ),
+              ),
+            ),
+            Container(height: 10),
             TextField(
               controller: minAgeController,
               decoration: InputDecoration(
@@ -284,7 +317,6 @@ class EventWidgetState extends State<EventWidget> {
 
                   // If image upload is successful
                   if (pictureUrl.isNotEmpty) {
-                    // Create an EventInfo object with other details
                     DateTime selectedDateTime = DateTime(
                       selectedDate.year,
                       selectedDate.month,
@@ -300,7 +332,8 @@ class EventWidgetState extends State<EventWidget> {
                       dateTime: selectedDateTime,
                       minAge: int.tryParse(minAgeController.text) ?? 0,
                       pictureUrl: pictureUrl,
-
+                      lon: double.tryParse(lonController.text) ?? 0.0,
+                      lat: double.tryParse(latController.text) ?? 0.0,
                     );
 
                     // Add the event to the database
