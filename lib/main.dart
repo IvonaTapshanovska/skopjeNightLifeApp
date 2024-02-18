@@ -224,19 +224,28 @@ class MainListScreenState extends State<MainListScreen> {
         ),
         backgroundColor: Colors.indigo,
         actions: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.add,
-                  color: Colors.white70,
-                ),
-                onPressed: () => FirebaseAuth.instance.currentUser != null
-                    ? _addEventFunction(context)
-                    : _navigateToSignInPage(context),
+      FutureBuilder<List<String>>(
+      // Assuming you have the _getUserRoles function
+      future: _getUserRoles(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // Check if the user has the 'admin' role
+          bool isAdmin = snapshot.data?.contains('admin') ?? false;
+
+          if (isAdmin) {
+            return IconButton(
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white70,
               ),
-            ],
-          ),
+              onPressed: () => _addEventFunction(context),
+            );
+          }
+        }
+
+        return SizedBox.shrink(); // If not an admin, return an empty SizedBox
+      },
+    ),
           Row(
             children: [
               IconButton(
@@ -244,7 +253,9 @@ class MainListScreenState extends State<MainListScreen> {
                   Icons.login,
                   color: Colors.white70,
                 ),
-                onPressed: _signOut,
+                onPressed: () => FirebaseAuth.instance.currentUser != null
+                    ? _signOut()
+                    : _navigateToSignInPage(context),
               ),
             ],
           )
@@ -381,6 +392,7 @@ class MainListScreenState extends State<MainListScreen> {
 
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
+
   }
 
   void _navigateToSignInPage(BuildContext context) {
@@ -389,25 +401,53 @@ class MainListScreenState extends State<MainListScreen> {
     });
   }
 
+  Future<List<String>> _getUserRoles() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        DocumentSnapshot userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+        if (userSnapshot.exists) {
+          // Assuming roles are stored as an array in the 'roles' field
+          List<String> userRoles = List<String>.from(userSnapshot['roles']);
+          return userRoles;
+        }
+      }
+
+      // If user is null or document doesn't exist, return an empty list
+      return [];
+    } catch (e) {
+      print("Error getting user roles: $e");
+      return [];
+    }
+  }
+
   Future<void> _addEventFunction(BuildContext context) async {
-    return showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        return GestureDetector(
-          onTap: () {},
-          behavior: HitTestBehavior.opaque,
-          child: EventWidget(
-            addEvent: _addEvent,
-          ),
+    List<String> userRoles = await _getUserRoles();
+
+        return showModalBottomSheet(
+          context: context,
+          builder: (_) {
+            return GestureDetector(
+              onTap: () {},
+              behavior: HitTestBehavior.opaque,
+              child: EventWidget(
+                addEvent: _addEvent,
+              ),
+            );
+          },
         );
-      },
-    );
+
   }
 
   void _addEvent(EventInfo event) async {
     await events.add(event.toMap());
     Navigator.pop(context);
   }
+
+
 }
 
 class AuthScreen extends StatefulWidget {
@@ -421,6 +461,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
@@ -429,17 +470,36 @@ class AuthScreenState extends State<AuthScreen> {
   Future<void> _authAction() async {
     try {
       if (widget.isLogin) {
-        await _auth.signInWithEmailAndPassword(
+       UserCredential userCredential= await _auth.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
+
         _successDialog("You have successfully logged in");
         _navigateToHomePage();
       } else {
-        await _auth.createUserWithEmailAndPassword(
+        UserCredential userCredential=await _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
+        User? user = FirebaseAuth.instance.currentUser;
+        if(user!=null)
+        {
+          if(_emailController.text.toLowerCase().contains('admin'))
+          {
+            await firestore.collection('users').doc(userCredential.user!.uid).set({
+            'email':_emailController.text,
+            'roles': ['admin'],
+            });
+          }
+          else
+          {
+            await firestore.collection('users').doc(userCredential.user!.uid).set({
+            'email': _emailController.text,
+            'roles': ['user'],
+            });
+          }
+        }
         _successDialog("Your registration is successful");
         _navigateToLoginPage();
       }
