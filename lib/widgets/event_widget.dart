@@ -37,7 +37,7 @@ class EventWidgetState extends State<EventWidget> {
 
     if (datePicked != null && datePicked != selectedDate) {
       setState(() {
-        _pickImage();
+       // _pickImage();
         selectedDate = datePicked;
       });
     }
