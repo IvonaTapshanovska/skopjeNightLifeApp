@@ -9,6 +9,8 @@ class EventInfo {
   final String pictureUrl;
   final double lon;
   final double lat;
+  final int? rating;
+
 
   EventInfo({
     required this.clubName,
@@ -19,6 +21,7 @@ class EventInfo {
     required this.pictureUrl,
     required this.lon,
     required this.lat,
+    this.rating,
   });
 
   factory EventInfo.fromMap(Map<String, dynamic> map) {
@@ -33,6 +36,7 @@ class EventInfo {
       pictureUrl: map['pictureUrl'] ?? '',
       lon: map['lon'] ?? 0.0,
       lat: map['lat'] ?? 0.0,
+      rating: map['rating']?.toInt(),
     );
   }
 
@@ -46,6 +50,7 @@ class EventInfo {
       'pictureUrl': pictureUrl,
       'lon': lon,
       'lat': lat,
+      'rating':rating,
     };
   }
 

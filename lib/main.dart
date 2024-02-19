@@ -38,12 +38,27 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   final EventInfo event;
 
   EventDetailsScreen({Key? key, required this.event}) : super(key: key);
 
+  @override
+  _EventDetailsScreenState createState() => _EventDetailsScreenState();
+}
+class _EventDetailsScreenState extends State<EventDetailsScreen>{
+
   late GoogleMapController mapController;
+  late String selectedRating;
+  late bool userLoggedIn;
+
+  @override
+  void initState(){
+    super.initState();
+    selectedRating='1';
+    userLoggedIn=FirebaseAuth.instance.currentUser!=null;
+
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -56,7 +71,7 @@ class EventDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title:Text(
 
-          event.clubName,
+          widget.event.clubName,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -66,17 +81,17 @@ class EventDetailsScreen extends StatelessWidget {
 
       ),
       backgroundColor: Colors.indigo,
-
-      body: Padding(
+      body:SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               width: double.infinity,
-              child: event.pictureUrl.isNotEmpty
+              child: widget.event.pictureUrl.isNotEmpty
                   ? Image.network(
-                File(event.pictureUrl).path,
+                File(widget.event.pictureUrl).path,
                 fit: BoxFit.cover,
               )
                   : Text('No Image Available'),
@@ -92,7 +107,7 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              event.clubName,
+              widget.event.clubName,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -109,7 +124,7 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              event.eventName,
+              widget.event.eventName,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -125,7 +140,7 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              event.location,
+              widget.event.location,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -141,7 +156,7 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              DateFormat('yyyy-MM-dd   HH:mm').format(event.dateTime),
+              DateFormat('yyyy-MM-dd   HH:mm').format(widget.event.dateTime),
               // Format the date and time using DateFormat
               style: TextStyle(
                 fontSize: 16,
@@ -158,20 +173,45 @@ class EventDetailsScreen extends StatelessWidget {
               ),
             ),
             Text(
-              event.minAge.toString(),
+              widget.event.minAge.toString(),
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
                 fontStyle: FontStyle.italic,
               ),
             ),
+           if (userLoggedIn)
+  DropdownButton<int>(
+    value: int.parse(selectedRating),
+    onChanged: (value) {
+      setState(() {
+        selectedRating = value.toString();
+      });
+    },
+    items: [1, 2, 3, 4, 5].map((int value) {
+      return DropdownMenuItem<int>(
+        value: value,
+        child: Text('Rating: $value'),
+      );
+    }).toList(),
+  ),
+// Add the submit button
+if (userLoggedIn)
+  ElevatedButton(
+    onPressed: () {
+      _submitRating();
+    },
+    child: Text('Submit Rating'),
+  ),
+
+
             Divider(),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MapPage(event: event,),
+                    builder: (context) => MapPage(event: widget.event,),
                   ),
                 );
               },
@@ -180,9 +220,58 @@ class EventDetailsScreen extends StatelessWidget {
             ],
         ),
     ),
+      ),
+    );
+    
+  }
+ void _submitRating() async {
+  try {
+    int ratingValue = int.parse(selectedRating);
+
+    // Query Firestore to get the document by eventName
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .where('eventName', isEqualTo: widget.event.eventName)
+        .get();
+
+    // Check if the document exists
+    if (querySnapshot.docs.isNotEmpty) {
+      // Update the rating in the Firestore database
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(querySnapshot.docs.first.id)
+          .update({
+        'rating': ratingValue,
+      });
+
+      // Show a success message or handle the submission as needed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Rating submitted successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Document not found
+      print('Error: Document not found for eventName: ${widget.event.eventName}');
+    }
+  } catch (e) {
+    // Handle any potential errors
+    print("Error submitting rating: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error submitting rating. Please try again.'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 }
+
+
+
+
+}
+
 class MainListScreen extends StatefulWidget {
   const MainListScreen({Key? key});
 
@@ -354,6 +443,7 @@ class MainListScreenState extends State<MainListScreen> {
                       ),
                     ],
                   ),
+
                   ElevatedButton(
                     onPressed: () {
                       // Navigate to the event details page
