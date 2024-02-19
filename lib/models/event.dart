@@ -9,7 +9,7 @@ class EventInfo {
   final String pictureUrl;
   final double lon;
   final double lat;
-  final int? rating;
+  final List<int>? rating;
 
 
   EventInfo({
@@ -36,7 +36,7 @@ class EventInfo {
       pictureUrl: map['pictureUrl'] ?? '',
       lon: map['lon'] ?? 0.0,
       lat: map['lat'] ?? 0.0,
-      rating: map['rating']?.toInt(),
+      rating: List<int>.from(map['ratings'] ?? []),
     );
   }
 

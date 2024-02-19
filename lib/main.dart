@@ -51,14 +51,38 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
   late GoogleMapController mapController;
   late String selectedRating;
   late bool userLoggedIn;
+   late List<int> ratings;
 
   @override
   void initState(){
     super.initState();
     selectedRating='1';
     userLoggedIn=FirebaseAuth.instance.currentUser!=null;
+    ratings=[];
+    _fetchRatings();
 
   }
+  // Add this method to fetch ratings from Firestore
+  Future<void> _fetchRatings() async {
+    try {
+      // Query Firestore to get the document by eventName
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .where('eventName', isEqualTo: widget.event.eventName)
+          .get();
+
+      // Check if the document exists
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          // Set the ratings based on the data from Firestore
+          ratings = List<int>.from(querySnapshot.docs.first['rating'] ?? []);
+        });
+      }
+    } catch (e) {
+      print("Error fetching ratings: $e");
+    }
+  }
+  
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -180,6 +204,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                 fontStyle: FontStyle.italic,
               ),
             ),
+            
            if (userLoggedIn)
   DropdownButton<int>(
     value: int.parse(selectedRating),
@@ -224,6 +249,8 @@ if (userLoggedIn)
     );
     
   }
+  
+
  void _submitRating() async {
   try {
     int ratingValue = int.parse(selectedRating);
@@ -236,12 +263,19 @@ if (userLoggedIn)
 
     // Check if the document exists
     if (querySnapshot.docs.isNotEmpty) {
+      // Get the existing ratings array or initialize an empty list
+      List<int> existingRatings =
+          List<int>.from(querySnapshot.docs.first['rating'] ?? []);
+
+      // Add the new rating to the existing ratings list
+      existingRatings.add(ratingValue);
+
       // Update the rating in the Firestore database
       await FirebaseFirestore.instance
           .collection('events')
           .doc(querySnapshot.docs.first.id)
           .update({
-        'rating': ratingValue,
+        'rating': FieldValue.arrayUnion(existingRatings),
       });
 
       // Show a success message or handle the submission as needed
@@ -266,6 +300,7 @@ if (userLoggedIn)
     );
   }
 }
+
 
 
 
