@@ -16,7 +16,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final LatLng _pGooglePlex;
 
-  // Define a Set to store markers
   Set<Marker> _markers = {};
 
   _MapPageState(EventInfo event)
@@ -24,7 +23,7 @@ class _MapPageState extends State<MapPage> {
     // Add a marker for _pGooglePlex
     _markers.add(
       Marker(
-        markerId: MarkerId('pGooglePlex'),
+        markerId: MarkerId('_pGooglePlex'),
         position: _pGooglePlex,
         // You can customize the marker icon here if needed
         // icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
@@ -38,7 +37,7 @@ class _MapPageState extends State<MapPage> {
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: _pGooglePlex,
-          zoom: 21,
+          zoom: 16,
         ),
         markers: _markers,
       ),
