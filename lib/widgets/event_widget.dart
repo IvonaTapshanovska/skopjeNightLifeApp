@@ -25,7 +25,7 @@ class EventWidgetState extends State<EventWidget> {
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
 
-  String pictureUrl = ''; // Moved the pictureUrl here
+  String pictureUrl = ''; 
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? datePicked = await showDatePicker(
@@ -70,16 +70,16 @@ class EventWidgetState extends State<EventWidget> {
     try {
       final storageRef = firebase_storage.FirebaseStorage.instance.ref().child(pictureUrl);
 
-      // Upload the file to Firebase Storage
+     
       await storageRef.putFile(imageFile);
 
-      // Get the download URL for the uploaded image
+     
       final downloadUrl = await storageRef.getDownloadURL();
 
       return downloadUrl;
     } catch (e) {
       print('Error uploading image to Firebase Storage: $e');
-      return ''; // Return an empty string if the upload fails
+      return ''; 
     }
   }
 
@@ -97,7 +97,7 @@ class EventWidgetState extends State<EventWidget> {
         selectedTime.minute,
       );
 
-      // Convert DateTime to timestamp
+   
       final timestamp = Timestamp.fromDate(selectedDateTime);
       final event = EventInfo(
         clubName: clubController.text,
@@ -113,10 +113,10 @@ class EventWidgetState extends State<EventWidget> {
         lat: double.tryParse(latController.text) ?? 0.0,
       );
       EventInfo getEventInfo() => event;
-      // Call the addEvent callback to add the event to the parent widget
+      
       widget.addEvent(event);
 
-      // Clear form fields
+      
       setState(() {
         clubController.clear();
         eventController.clear();
@@ -125,7 +125,7 @@ class EventWidgetState extends State<EventWidget> {
         pictureUrl = '';
         lonController.clear();
         latController.clear();
-        // Reset other controllers or form state as needed
+        
       });
     }
   }
@@ -308,14 +308,14 @@ class EventWidgetState extends State<EventWidget> {
             const SizedBox(height: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.green, // Change button color
+                primary: Colors.green, 
               ),
               onPressed: () async {
                 try {
-                  // Upload image to Firebase Storage
+                
                   await _uploadImageAndAddEvent();
 
-                  // If image upload is successful
+                  
                   if (pictureUrl.isNotEmpty) {
                     DateTime selectedDateTime = DateTime(
                       selectedDate.year,
@@ -336,17 +336,17 @@ class EventWidgetState extends State<EventWidget> {
                       lat: double.tryParse(latController.text) ?? 0.0,
                     );
 
-                    // Add the event to the database
+                  
                     await widget.addEvent(event);
 
-                    // Close the modal bottom sheet
+                   
                     Navigator.pop(context);
                   } else {
-                    // Handle case where image upload fails
+                    
                     print('Image upload failed');
                   }
                 } catch (e) {
-                  // Handle any errors that occur during image upload or event addition
+                  
                   print('Error: $e');
                 }
               },

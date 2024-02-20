@@ -62,23 +62,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
     userLoggedIn=FirebaseAuth.instance.currentUser!=null;
     ratings=[];
     _fetchRatings();
-
   }
 
-
-  // Add this method to fetch ratings from Firestore
   Future<void> _fetchRatings() async {
     try {
-      // Query Firestore to get the document by eventName
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('events')
           .where('eventName', isEqualTo: widget.event.eventName)
           .get();
 
-      // Check if the document exists
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
-          // Set the ratings based on the data from Firestore
           ratings = List<int>.from(querySnapshot.docs.first['rating'] ?? []);
         });
       }
@@ -87,18 +81,14 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
     }
   }
 
-
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       appBar: AppBar(
         title:Text(
-
           widget.event.clubName,
           style: const TextStyle(
             fontSize: 20,
@@ -112,7 +102,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 bool isAdmin = snapshot.data?.contains('admin') ?? false;
-
                 if (isAdmin) {
                   return IconButton(
                     icon: const Icon(
@@ -126,16 +115,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                   );
                 }
               }
-
-              return const SizedBox.shrink(); // If not an admin, return an empty SizedBox
+              return const SizedBox.shrink(); 
             },
           ),
         ],
-
       ),
       backgroundColor: Colors.indigo,
       body:SingleChildScrollView(
-
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -274,9 +260,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                   ),
                 ],
               ),
-
-
-
               const Divider(),
               if (userLoggedIn)
                 DropdownButton<int>(
@@ -293,7 +276,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                     );
                   }).toList(),
                 ),
-
               if (userLoggedIn)
                 ElevatedButton(
                   onPressed: () {
@@ -301,30 +283,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                   },
                   child: const Text('Submit Rating'),
                 ),
-
-
               const Divider(),
               Center(
                 child: SizedBox(
-                  width: 300, // Adjust width as needed
-                  height: 300, // Adjust height as needed
+                  width: 300, 
+                  height: 300, 
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Optional: Add border radius
+                    borderRadius: BorderRadius.circular(10), 
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(widget.event.lat, widget.event.lon), // Use your event's coordinates
+                        target: LatLng(widget.event.lat, widget.event.lon), 
                         zoom: 18,
                       ),
                       markers: Set<Marker>.from([
                         Marker(
                           markerId: MarkerId('event_marker'),
-                          position: LatLng(widget.event.lat, widget.event.lon), // Use your event's coordinates
+                          position: LatLng(widget.event.lat, widget.event.lon), 
                         ),
                       ]),
                     ),
                   ),
                 ),
-
               ),
               Center(
                 child: ElevatedButton(
@@ -344,8 +323,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
        ),
       ),
     );
-
-
   }
 
   Future<List<String>> _getUserRoles() async {
@@ -356,24 +333,17 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
         DocumentSnapshot userSnapshot =
         await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
-        if (userSnapshot.exists) {
-          // Assuming roles are stored as an array in the 'roles' field
+        if (userSnapshot.exists) {         
           List<String> userRoles = List<String>.from(userSnapshot['roles']);
           return userRoles;
         }
       }
-
-      // If user is null or document doesn't exist, return an empty list
       return [];
     } catch (e) {
       print("Error getting user roles: $e");
       return [];
     }
   }
-
-
-
-
 
   void _confirmDeleteEvent(BuildContext context, EventInfo event) {
     showDialog(
@@ -390,7 +360,6 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/'));
               _deleteEventByName(event.clubName);
-
             },
             child: const Text('Delete'),
           ),
@@ -418,16 +387,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
     }
   }
 
-
-
-
   void _deleteEventByName(String eventName) async {
-    try {
-      // Get the event ID by name
+    try {     
       String? eventId = await getEventIdByName(eventName);
 
-      if (eventId != null) {
-        // If the event ID is found, delete the event
+      if (eventId != null) {      
         await FirebaseFirestore.instance.collection('events').doc(eventId).delete();
         print('Event deleted successfully.');
       } else {
@@ -443,22 +407,18 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
   try {
     int ratingValue = int.parse(selectedRating);
 
-    // Query Firestore to get the document by eventName
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('events')
         .where('eventName', isEqualTo: widget.event.eventName)
         .get();
-
-    // Check if the document exists
-    if (querySnapshot.docs.isNotEmpty) {
-      // Get the existing ratings array or initialize an empty list
+   
+    if (querySnapshot.docs.isNotEmpty) {     
       List<int> existingRatings =
           List<int>.from(querySnapshot.docs.first['rating'] ?? []);
-
-      // Add the new rating to the existing ratings list
+    
       existingRatings.add(ratingValue);
 
-      // Update the rating in the Firestore database
+    
       await FirebaseFirestore.instance
           .collection('events')
           .doc(querySnapshot.docs.first.id)
@@ -466,7 +426,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
         'rating': FieldValue.arrayUnion(existingRatings),
       });
 
-      // Show a success message or handle the submission as needed
+     
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Rating submitted successfully!'),
@@ -474,11 +434,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
         ),
       );
     } else {
-      // Document not found
+     
       print('Error: Document not found for eventName: ${widget.event.eventName}');
     }
   } catch (e) {
-    // Handle any potential errors
+   
     print("Error submitting rating: $e");
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -508,16 +468,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
     }
   }
 
-
-
-
   void _deleteEventByName(String eventName) async {
-    try {
-      // Get the event ID by name
+    try {   
       String? eventId = await getEventIdByName(eventName);
 
-      if (eventId != null) {
-        // If the event ID is found, delete the event
+      if (eventId != null) {        
         await FirebaseFirestore.instance.collection('events').doc(eventId).delete();
         print('Event deleted successfully.');
       } else {
@@ -532,23 +487,18 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
   void _submitRating() async {
     try {
       int ratingValue = int.parse(selectedRating);
-
-      // Query Firestore to get the document by eventName
+ 
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('events')
           .where('eventName', isEqualTo: widget.event.eventName)
           .get();
-
-      // Check if the document exists
-      if (querySnapshot.docs.isNotEmpty) {
-        // Get the existing ratings array or initialize an empty list
+    
+      if (querySnapshot.docs.isNotEmpty) {    
         List<int> existingRatings =
         List<int>.from(querySnapshot.docs.first['rating'] ?? []);
-
-        // Add the new rating to the existing ratings list
+      
         existingRatings.add(ratingValue);
-
-        // Update the rating in the Firestore database
+       
         await FirebaseFirestore.instance
             .collection('events')
             .doc(querySnapshot.docs.first.id)
@@ -556,7 +506,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
           'rating': FieldValue.arrayUnion(existingRatings),
         });
 
-        // Show a success message or handle the submission as needed
+       
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Rating submitted successfully!'),
@@ -564,11 +514,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
           ),
         );
       } else {
-        // Document not found
+        
         print('Error: Document not found for eventName: ${widget.event.eventName}');
       }
     } catch (e) {
-      // Handle any potential errors
+      
       print("Error submitting rating: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -598,7 +548,7 @@ class MainListScreenState extends State<MainListScreen> {
 
   late DateTime selectedDate;
   late TimeOfDay selectedTime;
-  String pictureUrl = ''; // Set the picture URL accordingly
+  String pictureUrl = '';
 
   @override
   void initState() {
@@ -623,11 +573,11 @@ class MainListScreenState extends State<MainListScreen> {
         actions: [
 
           FutureBuilder<List<String>>(
-            // Assuming you have the _getUserRoles function
+           
             future: _getUserRoles(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                // Check if the user has the 'admin' role
+                
                 bool isAdmin = snapshot.data?.contains('admin') ?? false;
 
                 if (isAdmin) {
@@ -641,7 +591,7 @@ class MainListScreenState extends State<MainListScreen> {
                 }
               }
 
-              return SizedBox.shrink(); // If not an admin, return an empty SizedBox
+              return SizedBox.shrink(); 
             },
           ),
 
@@ -742,7 +692,7 @@ class MainListScreenState extends State<MainListScreen> {
                       ),
                       Text(
                         DateFormat('yyyy-MM-dd    HH:mm').format(event.dateTime),
-                        // Format the date and time using DateFormat
+                        
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white70,
@@ -757,7 +707,7 @@ class MainListScreenState extends State<MainListScreen> {
 
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to the event details page
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -811,13 +761,10 @@ class MainListScreenState extends State<MainListScreen> {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
         if (userSnapshot.exists) {
-          // Assuming roles are stored as an array in the 'roles' field
           List<String> userRoles = List<String>.from(userSnapshot['roles']);
           return userRoles;
         }
       }
-
-      // If user is null or document doesn't exist, return an empty list
       return [];
     } catch (e) {
       print("Error getting user roles: $e");
@@ -846,8 +793,6 @@ class MainListScreenState extends State<MainListScreen> {
     await events.add(event.toMap());
     Navigator.pop(context);
   }
-
-
 }
 
 class AuthScreen extends StatefulWidget {
@@ -973,46 +918,41 @@ class AuthScreenState extends State<AuthScreen> {
         title: widget.isLogin ? const Text("Log in") : const Text("Sign up"),
       ),
       body: Container(
-        // Set the background color for the login page
-        color: const Color.fromARGB(255, 220, 220, 220), // You can choose any color you prefer
+        color: const Color.fromARGB(255, 220, 220, 220),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Make the email text bold
               const Text(
                 "Email",
                 style: TextStyle(
-                  color: Colors.black, // Text color
+                  color: Colors.black, 
                   fontSize: 20,
-                  fontWeight: FontWeight.bold, // Bold
+                  fontWeight: FontWeight.bold, 
                 ),
               ),
               TextField(
                 controller: _emailController,
-                //decoration: const InputDecoration(labelText: "Enter your email"),
               ),
               const SizedBox(height: 20),
-              // Make the password text bold
               const Text(
                 "Password",
                 style: TextStyle(
-                  color: Colors.black, // Text color
+                  color: Colors.black, 
                   fontSize: 20,
-                  fontWeight: FontWeight.bold, // Bold
+                  fontWeight: FontWeight.bold, 
                 ),
               ),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                //decoration: const InputDecoration(labelText: "Enter your password"),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.indigo,  // Button text color
+                  backgroundColor: Colors.indigo,
                 ),
                 onPressed: _authAction,
                 child: Text(widget.isLogin ? "Sign In" : "Register"),

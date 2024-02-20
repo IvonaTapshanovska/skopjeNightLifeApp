@@ -20,13 +20,12 @@ class _MapPageState extends State<MapPage> {
 
   _MapPageState(EventInfo event)
       : _pGooglePlex = LatLng(event.lat, event.lon) {
-    // Add a marker for _pGooglePlex
+   
     _markers.add(
       Marker(
         markerId: MarkerId('_pGooglePlex'),
         position: _pGooglePlex,
-        // You can customize the marker icon here if needed
-        // icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        
       ),
     );
   }
