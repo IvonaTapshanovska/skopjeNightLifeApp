@@ -51,7 +51,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
   late GoogleMapController mapController;
   late String selectedRating;
   late bool userLoggedIn;
+<<<<<<< HEAD
   late List<int> ratings;
+=======
+   late List<int> ratings;
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
   late EventInfo event;
 
   @override
@@ -101,9 +105,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
 
           widget.event.clubName,
           style: const TextStyle(
+<<<<<<< HEAD
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black87
+=======
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
           ),
         ),
         actions: [
@@ -135,6 +145,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
       ),
       backgroundColor: Colors.indigo,
       body:SingleChildScrollView(
+<<<<<<< HEAD
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -340,9 +351,151 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
               )
 
 
+=======
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: widget.event.pictureUrl.isNotEmpty
+                  ? Image.network(
+                File(widget.event.pictureUrl).path,
+                fit: BoxFit.cover,
+              )
+                  : const Text('No Image Available'),
+            ),
+            const Divider(),
+            const Text(
+              'Club Name:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            Text(
+              widget.event.clubName,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Event Name:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              widget.event.eventName,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Location:',
+              style: TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              widget.event.location,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Date:',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            Text(
+              DateFormat('yyyy-MM-dd   HH:mm').format(widget.event.dateTime),
+              // Format the date and time using DateFormat
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const Divider(),
+            const Text(
+              'Minimum Age:',
+              style: TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+                color: Colors.white,
+              ),
+            ),
+            Text(
+              widget.event.minAge.toString(),
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+
+           if (userLoggedIn)
+  DropdownButton<int>(
+    value: int.parse(selectedRating),
+    onChanged: (value) {
+      setState(() {
+        selectedRating = value.toString();
+      });
+    },
+    items: [1, 2, 3, 4, 5].map((int value) {
+      return DropdownMenuItem<int>(
+        value: value,
+        child: Text('Rating: $value'),
+      );
+    }).toList(),
+  ),
+// Add the submit button
+if (userLoggedIn)
+  ElevatedButton(
+    onPressed: () {
+      _submitRating();
+    },
+    child: const Text('Submit Rating'),
+  ),
+
+
+            const Divider(),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MapPage(event: widget.event,),
+                  ),
+                );
+              },
+              child: const Text('Map'),
+            ),
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
             ],
           ),
         ),
+<<<<<<< HEAD
+=======
+    ),
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
       ),
     );
 
@@ -396,6 +549,98 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
           ),
         ],
       ),
+<<<<<<< HEAD
+=======
+    );
+  }
+
+  Future<String?> getEventIdByName(String clubName) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .where('clubName', isEqualTo: clubName)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      } else {
+
+        return null;
+      }
+    } catch (e) {
+      print('Error getting event ID by name: $e');
+      return null;
+    }
+  }
+
+
+
+
+  void _deleteEventByName(String eventName) async {
+    try {
+      // Get the event ID by name
+      String? eventId = await getEventIdByName(eventName);
+
+      if (eventId != null) {
+        // If the event ID is found, delete the event
+        await FirebaseFirestore.instance.collection('events').doc(eventId).delete();
+        print('Event deleted successfully.');
+      } else {
+        print('Event not found or an error occurred while getting the ID.');
+      }
+    } catch (e) {
+      print('Error deleting event: $e');
+    }
+  }
+
+
+  void _submitRating() async {
+  try {
+    int ratingValue = int.parse(selectedRating);
+
+    // Query Firestore to get the document by eventName
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .where('eventName', isEqualTo: widget.event.eventName)
+        .get();
+
+    // Check if the document exists
+    if (querySnapshot.docs.isNotEmpty) {
+      // Get the existing ratings array or initialize an empty list
+      List<int> existingRatings =
+          List<int>.from(querySnapshot.docs.first['rating'] ?? []);
+
+      // Add the new rating to the existing ratings list
+      existingRatings.add(ratingValue);
+
+      // Update the rating in the Firestore database
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(querySnapshot.docs.first.id)
+          .update({
+        'rating': FieldValue.arrayUnion(existingRatings),
+      });
+
+      // Show a success message or handle the submission as needed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Rating submitted successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Document not found
+      print('Error: Document not found for eventName: ${widget.event.eventName}');
+    }
+  } catch (e) {
+    // Handle any potential errors
+    print("Error submitting rating: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Error submitting rating. Please try again.'),
+        duration: Duration(seconds: 2),
+      ),
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
     );
   }
 
@@ -495,6 +740,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
 
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+
+}
+
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
 class MainListScreen extends StatefulWidget {
   const MainListScreen({Key? key});
 
@@ -536,6 +790,7 @@ class MainListScreenState extends State<MainListScreen> {
         ),
         backgroundColor: Colors.indigo,
         actions: [
+<<<<<<< HEAD
           FutureBuilder<List<String>>(
             // Assuming you have the _getUserRoles function
             future: _getUserRoles(),
@@ -558,6 +813,30 @@ class MainListScreenState extends State<MainListScreen> {
               return SizedBox.shrink(); // If not an admin, return an empty SizedBox
             },
           ),
+=======
+      FutureBuilder<List<String>>(
+      // Assuming you have the _getUserRoles function
+      future: _getUserRoles(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // Check if the user has the 'admin' role
+          bool isAdmin = snapshot.data?.contains('admin') ?? false;
+
+          if (isAdmin) {
+            return IconButton(
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white70,
+              ),
+              onPressed: () => _addEventFunction(context),
+            );
+          }
+        }
+
+        return SizedBox.shrink(); // If not an admin, return an empty SizedBox
+      },
+    ),
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
           Row(
             children: [
               IconButton(
@@ -740,6 +1019,7 @@ class MainListScreenState extends State<MainListScreen> {
   Future<void> _addEventFunction(BuildContext context) async {
     List<String> userRoles = await _getUserRoles();
 
+<<<<<<< HEAD
     return showModalBottomSheet(
       context: context,
       builder: (_) {
@@ -752,6 +1032,20 @@ class MainListScreenState extends State<MainListScreen> {
         );
       },
     );
+=======
+        return showModalBottomSheet(
+          context: context,
+          builder: (_) {
+            return GestureDetector(
+              onTap: () {},
+              behavior: HitTestBehavior.opaque,
+              child: EventWidget(
+                addEvent: _addEvent,
+              ),
+            );
+          },
+        );
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
 
   }
 
@@ -783,7 +1077,11 @@ class AuthScreenState extends State<AuthScreen> {
   Future<void> _authAction() async {
     try {
       if (widget.isLogin) {
+<<<<<<< HEAD
         UserCredential userCredential= await _auth.signInWithEmailAndPassword(
+=======
+       UserCredential userCredential= await _auth.signInWithEmailAndPassword(
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -801,15 +1099,25 @@ class AuthScreenState extends State<AuthScreen> {
           if(_emailController.text.toLowerCase().contains('admin'))
           {
             await firestore.collection('users').doc(userCredential.user!.uid).set({
+<<<<<<< HEAD
               'email':_emailController.text,
               'roles': ['admin'],
+=======
+            'email':_emailController.text,
+            'roles': ['admin'],
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
             });
           }
           else
           {
             await firestore.collection('users').doc(userCredential.user!.uid).set({
+<<<<<<< HEAD
               'email': _emailController.text,
               'roles': ['user'],
+=======
+            'email': _emailController.text,
+            'roles': ['user'],
+>>>>>>> f67683ba3cced22d9addc9079b78312ee8d47147
             });
           }
         }
