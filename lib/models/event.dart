@@ -10,6 +10,7 @@ class EventInfo {
   final double lon;
   final double lat;
   final List<int>? rating;
+  final double? averageRating;
 
 
   EventInfo({
@@ -22,6 +23,7 @@ class EventInfo {
     required this.lon,
     required this.lat,
     this.rating,
+    this.averageRating,
   });
 
   factory EventInfo.fromMap(Map<String, dynamic> map) {
@@ -37,6 +39,7 @@ class EventInfo {
       lon: map['lon'] ?? 0.0,
       lat: map['lat'] ?? 0.0,
       rating: List<int>.from(map['ratings'] ?? []),
+      averageRating: (map['averageRating'] ?? 0.0).toDouble(),
     );
   }
 
@@ -51,6 +54,7 @@ class EventInfo {
       'lon': lon,
       'lat': lat,
       'rating':rating,
+      'averageRating':averageRating,
     };
   }
 

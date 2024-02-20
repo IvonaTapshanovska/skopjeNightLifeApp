@@ -81,6 +81,33 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
     }
   }
 
+Future<double> _calculateAverageRating(String clubName) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .where('clubName', isEqualTo: clubName)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      List<int> allRatings = [];
+      querySnapshot.docs.forEach((doc) {
+        allRatings.addAll(List<int>.from(doc['rating'] ?? []));
+      });
+
+      if (allRatings.isNotEmpty) {
+        double averageRating = allRatings.reduce((a, b) => a + b) / allRatings.length;
+        return averageRating;
+      }
+    }
+  } catch (e) {
+    print("Error calculating average rating: $e");
+  }
+
+  return 0.0; // Default to 0.0 if no ratings are available or an error occurs
+}
+
+
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -259,6 +286,39 @@ class _EventDetailsScreenState extends State<EventDetailsScreen>{
                     ),
                   ),
                 ],
+              ),
+              const Divider(),
+              FutureBuilder(
+                future: _calculateAverageRating(widget.event.clubName),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    double averageRating = snapshot.data as double;
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Average Rating:',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          averageRating.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
               ),
               const Divider(),
               if (userLoggedIn)
